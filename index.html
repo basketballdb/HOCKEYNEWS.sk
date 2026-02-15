@@ -1,377 +1,293 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Private Photo Feed</title>
-
 <style>
-:root {
-    --bg:#fafafa;
-    --card:#ffffff;
-    --text:#111;
-    --border:#ddd;
-    --accent:#0095f6;
-}
-body.dark {
-    --bg:#121212;
-    --card:#1e1e1e;
-    --text:#f1f1f1;
-    --border:#333;
-    --accent:#4dabf7;
-}
-
-*{box-sizing:border-box;}
-
 body{
+    font-family: Arial, sans-serif;
     margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    transition:.3s ease;
+    background:#fafafa;
 }
-
 header{
-    background:var(--card);
-    padding:18px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-bottom:1px solid var(--border);
-    font-weight:600;
+    background:white;
+    padding:15px;
+    position:sticky;
+    top:0;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    z-index:10;
 }
-
-.toggle-dark{
-    cursor:pointer;
-    padding:6px 10px;
-    border:1px solid var(--border);
-    border-radius:20px;
-    font-size:14px;
+h1{
+    margin:0;
 }
-
 .container{
-    max-width:950px;
+    max-width:700px;
     margin:auto;
     padding:20px;
 }
-
-.post-form{
-    background:var(--card);
-    padding:20px;
-    border-radius:12px;
-    border:1px solid var(--border);
-    margin-bottom:20px;
-}
-
-textarea{
-    width:100%;
-    border:1px solid var(--border);
-    border-radius:8px;
-    padding:10px;
-    resize:none;
-    margin-bottom:12px;
-    background:transparent;
-    color:var(--text);
-}
-
-input[type="file"], input[type="text"]{
-    width:100%;
-    padding:8px;
-    margin-bottom:12px;
-    border-radius:6px;
-    border:1px solid var(--border);
-}
-
-button{
-    background:var(--accent);
-    border:none;
-    padding:8px 14px;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-.feed{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-    gap:20px;
-}
-
 .post{
-    position:relative;
-    cursor:pointer;
+    background:white;
+    border-radius:12px;
+    margin-bottom:25px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
+    overflow:hidden;
 }
-
 .post img{
     width:100%;
-    height:260px;
-    object-fit:cover;
-    border-radius:12px;
+    cursor:pointer;
 }
-
-.overlay{
-    position:absolute;
-    inset:0;
-    background:rgba(0,0,0,.4);
-    border-radius:12px;
-    opacity:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color:white;
-    font-size:18px;
-    transition:.2s;
-}
-
-.post:hover .overlay{opacity:1;}
-
-.modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.85);
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-    z-index:999;
-}
-
-.modal-content{
-    background:var(--card);
-    width:100%;
-    max-width:900px;
-    border-radius:12px;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-}
-
-.modal-image{
-    text-align:center;
-    background:black;
-}
-
-.modal-image img{
-    max-height:500px;
-    max-width:100%;
-    cursor:zoom-in;
-}
-
-.modal-info{
+.post-content{
     padding:15px;
 }
-
-.modal-controls{
-    display:flex;
-    justify-content:space-between;
-    margin-top:10px;
+.description{
+    margin-bottom:10px;
 }
-
-.fullscreen{
+.date{
+    font-size:12px;
+    color:gray;
+}
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    background:#007bff;
+    color:white;
+    cursor:pointer;
+}
+button:hover{
+    background:#0056b3;
+}
+input, textarea{
+    width:100%;
+    margin-bottom:10px;
+    padding:8px;
+}
+#fullscreen{
     display:none;
     position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.95);
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.9);
     justify-content:center;
     align-items:center;
-    overflow:hidden;
-    z-index:9999;
+    z-index:100;
 }
-
-.fullscreen img{
+#fullscreen img{
+    max-width:90%;
+    max-height:90%;
     cursor:grab;
-    user-select:none;
-    transition:transform .1s ease;
+    transition:transform 0.2s;
+}
+.searchbar{
+    margin-top:10px;
 }
 </style>
 </head>
 <body>
 
 <header>
-    <div>My Private Photo Feed</div>
-    <div class="toggle-dark" onclick="toggleDark()">Toggle Mode</div>
+<h1>My Private Feed</h1>
+<div class="searchbar">
+<input type="text" id="searchText" placeholder="Search by description...">
+<input type="date" id="searchDate">
+<button onclick="searchPosts()">Search</button>
+<button onclick="clearSearch()">Clear</button>
+</div>
 </header>
 
 <div class="container">
 
-<div class="post-form">
-    <textarea id="caption" placeholder="Write a caption..."></textarea>
-    <input type="file" id="images" multiple accept="image/*">
-    <button onclick="createPost()">Create Post</button>
+<h3>Create Post</h3>
+<textarea id="descriptionInput" placeholder="Write description..."></textarea>
+<input type="file" id="imageInput" multiple accept="image/*">
+<button onclick="createPost()">Create Post</button>
+
+<hr>
+
+<div id="feed"></div>
+
 </div>
 
-<input type="text" id="searchInput" placeholder="Search by caption or date..." oninput="renderFeed()">
-
-<div class="feed" id="feed"></div>
-
-</div>
-
-<div class="modal" id="modal">
-<div class="modal-content">
-<div class="modal-image">
-<img id="modalImage" onclick="openFullscreen()">
-</div>
-<div class="modal-info">
-<div id="modalCaption"></div>
-<div id="modalDate" style="font-size:12px;color:gray;margin-top:4px;"></div>
-
-<div class="modal-controls">
-<div>
-<button onclick="prevImage()">◀</button>
-<button onclick="nextImage()">▶</button>
-</div>
-<div>
-<button onclick="likePost()">❤️ Like</button>
-<button onclick="deletePost()">🗑 Delete</button>
-<button onclick="closeModal()">Close</button>
-</div>
-</div>
-
-<div id="imageCounter" style="margin-top:8px;font-size:12px;"></div>
-</div>
-</div>
-</div>
-
-<div class="fullscreen" id="fullscreen" onclick="closeFullscreen()">
+<div id="fullscreen" onclick="closeFullscreen()">
 <img id="fsImage">
 </div>
 
 <script>
 
-let posts = JSON.parse(localStorage.getItem("posts")) || [];
-let currentPostIndex=0;
-let currentImageIndex=0;
+/* =========================
+   INDEXED DB SETUP
+========================= */
 
-function savePosts(){localStorage.setItem("posts",JSON.stringify(posts));}
+let db;
+const request = indexedDB.open("PhotoFeedDB",1);
+
+request.onupgradeneeded = function(e){
+    db = e.target.result;
+    db.createObjectStore("posts",{keyPath:"id",autoIncrement:true});
+};
+
+request.onsuccess = function(e){
+    db = e.target.result;
+    loadPosts();
+};
+
+function addPostToDB(post){
+    const tx = db.transaction("posts","readwrite");
+    const store = tx.objectStore("posts");
+    store.add(post);
+    tx.oncomplete = loadPosts;
+}
+
+/* =========================
+   CREATE POST
+========================= */
 
 function createPost(){
-    const caption=document.getElementById("caption").value;
-    const files=document.getElementById("images").files;
-    if(files.length===0) return;
+    const desc = document.getElementById("descriptionInput").value;
+    const files = document.getElementById("imageInput").files;
 
-    const images=[];
-    let loaded=0;
+    if(files.length===0){
+        alert("Select at least one image");
+        return;
+    }
 
-    for(let file of files){
-        const reader=new FileReader();
-        reader.onload=function(e){
+    let images = [];
+    let loaded = 0;
+
+    for(let i=0;i<files.length;i++){
+        const reader = new FileReader();
+        reader.onload = function(e){
             images.push(e.target.result);
             loaded++;
             if(loaded===files.length){
-                posts.unshift({
-                    caption,
-                    images,
-                    date:new Date().toLocaleString(),
-                    likes:0
-                });
-                savePosts();
-                renderFeed();
-                document.getElementById("caption").value="";
-                document.getElementById("images").value="";
+                const post={
+                    description:desc,
+                    images:images,
+                    date:new Date().toISOString().split("T")[0]
+                };
+                addPostToDB(post);
+                document.getElementById("descriptionInput").value="";
+                document.getElementById("imageInput").value="";
             }
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(files[i]);
     }
 }
 
-function renderFeed(){
-    const feed=document.getElementById("feed");
-    const query=document.getElementById("searchInput").value.toLowerCase();
+/* =========================
+   LOAD POSTS
+========================= */
+
+function loadPosts(){
+    const feed = document.getElementById("feed");
     feed.innerHTML="";
 
-    posts.forEach((post,index)=>{
-        if(query && !(post.caption.toLowerCase().includes(query)||post.date.toLowerCase().includes(query))) return;
+    const tx = db.transaction("posts","readonly");
+    const store = tx.objectStore("posts");
 
-        const div=document.createElement("div");
-        div.className="post";
-        div.onclick=()=>openModal(index);
+    store.openCursor(null,"prev").onsuccess = function(e){
+        const cursor = e.target.result;
+        if(cursor){
+            renderPost(cursor.value);
+            cursor.continue();
+        }
+    };
+}
 
-        const img=document.createElement("img");
-        img.src=post.images[0];
-        img.onclick=(e)=>{e.stopPropagation();openFullscreen(index,0);}
-        div.appendChild(img);
+function renderPost(post){
+    const feed = document.getElementById("feed");
 
-        const overlay=document.createElement("div");
-        overlay.className="overlay";
-        overlay.innerHTML=`❤️ ${post.likes}`;
-        div.appendChild(overlay);
+    const postDiv = document.createElement("div");
+    postDiv.className="post";
 
-        feed.appendChild(div);
+    post.images.forEach(img=>{
+        const image = document.createElement("img");
+        image.src = img;
+        image.onclick = ()=>openFullscreen(img);
+        postDiv.appendChild(image);
     });
+
+    const content = document.createElement("div");
+    content.className="post-content";
+
+    const desc = document.createElement("div");
+    desc.className="description";
+    desc.innerText=post.description;
+
+    const date = document.createElement("div");
+    date.className="date";
+    date.innerText=post.date;
+
+    content.appendChild(desc);
+    content.appendChild(date);
+    postDiv.appendChild(content);
+
+    feed.appendChild(postDiv);
 }
 
-function openModal(index){
-    currentPostIndex=index;
-    currentImageIndex=0;
-    document.getElementById("modal").style.display="flex";
-    updateModal();
+/* =========================
+   SEARCH
+========================= */
+
+function searchPosts(){
+    const text = document.getElementById("searchText").value.toLowerCase();
+    const date = document.getElementById("searchDate").value;
+
+    const feed = document.getElementById("feed");
+    feed.innerHTML="";
+
+    const tx = db.transaction("posts","readonly");
+    const store = tx.objectStore("posts");
+
+    store.openCursor(null,"prev").onsuccess = function(e){
+        const cursor = e.target.result;
+        if(cursor){
+            const post = cursor.value;
+            if(
+                (text==="" || post.description.toLowerCase().includes(text)) &&
+                (date==="" || post.date===date)
+            ){
+                renderPost(post);
+            }
+            cursor.continue();
+        }
+    };
 }
 
-function updateModal(){
-    const post=posts[currentPostIndex];
-    document.getElementById("modalImage").src=post.images[currentImageIndex];
-    document.getElementById("modalCaption").innerText=post.caption||"(No caption)";
-    document.getElementById("modalDate").innerText=post.date;
-    document.getElementById("imageCounter").innerText=
-        `Image ${currentImageIndex+1} of ${post.images.length}`;
+function clearSearch(){
+    document.getElementById("searchText").value="";
+    document.getElementById("searchDate").value="";
+    loadPosts();
 }
 
-function closeModal(){
-    document.getElementById("modal").style.display="none";
-}
+/* =========================
+   FULLSCREEN + ZOOM
+========================= */
 
-function nextImage(){
-    if(currentImageIndex<posts[currentPostIndex].images.length-1){
-        currentImageIndex++;
-        updateModal();
-    }
-}
+let scale=1;
+let translateX=0;
+let translateY=0;
+let isDragging=false;
+let startX,startY;
 
-function prevImage(){
-    if(currentImageIndex>0){
-        currentImageIndex--;
-        updateModal();
-    }
-}
-
-function likePost(){
-    posts[currentPostIndex].likes++;
-    savePosts();
-    renderFeed();
-    updateModal();
-}
-
-function deletePost(){
-    if(!confirm("Delete this post?")) return;
-    posts.splice(currentPostIndex,1);
-    savePosts();
-    closeModal();
-    renderFeed();
-}
-
-function toggleDark(){
-    document.body.classList.toggle("dark");
-}
-
-/* FULLSCREEN ZOOM */
-
-let scale=1, isDragging=false, startX, startY, translateX=0, translateY=0;
-
-function openFullscreen(postIndex=currentPostIndex,imgIndex=currentImageIndex){
+function openFullscreen(src){
     const fs=document.getElementById("fullscreen");
     const img=document.getElementById("fsImage");
+    img.src=src;
     fs.style.display="flex";
-    img.src=posts[postIndex].images[imgIndex];
     resetZoom();
 }
 
 function closeFullscreen(){
     document.getElementById("fullscreen").style.display="none";
-    resetZoom();
 }
 
 function resetZoom(){
-    scale=1; translateX=0; translateY=0;
+    scale=1;
+    translateX=0;
+    translateY=0;
     updateTransform();
 }
 
@@ -380,56 +296,39 @@ function updateTransform(){
     img.style.transform=`translate(${translateX}px,${translateY}px) scale(${scale})`;
 }
 
-window.addEventListener("load",function(){
-    const img=document.getElementById("fsImage");
+const img=document.getElementById("fsImage");
 
-    img.addEventListener("wheel",function(e){
-        e.preventDefault();
-        scale += e.deltaY<0?0.1:-0.1;
-        if(scale<1) scale=1;
-        updateTransform();
-    });
-
-    img.addEventListener("mousedown",function(e){
-        if(scale<=1) return;
-        isDragging=true;
-        img.style.cursor="grabbing";
-        startX=e.clientX-translateX;
-        startY=e.clientY-translateY;
-    });
-
-    document.addEventListener("mousemove",function(e){
-        if(!isDragging) return;
-        translateX=e.clientX-startX;
-        translateY=e.clientY-startY;
-        updateTransform();
-    });
-
-    document.addEventListener("mouseup",function(){
-        isDragging=false;
-        img.style.cursor="grab";
-    });
-
-    img.addEventListener("dblclick",function(){
-        scale=scale===1?2:1;
-        if(scale===1){translateX=0;translateY=0;}
-        updateTransform();
-    });
+img.addEventListener("wheel",e=>{
+    e.preventDefault();
+    if(e.deltaY<0) scale+=0.1;
+    else scale-=0.1;
+    if(scale<1) scale=1;
+    updateTransform();
 });
 
-document.addEventListener("keydown",function(e){
-    if(document.getElementById("modal").style.display==="flex"){
-        if(e.key==="ArrowRight") nextImage();
-        if(e.key==="ArrowLeft") prevImage();
-        if(e.key==="Escape") closeModal();
-    }
-    if(document.getElementById("fullscreen").style.display==="flex" && e.key==="Escape"){
-        closeFullscreen();
-    }
+img.addEventListener("mousedown",e=>{
+    if(scale<=1) return;
+    isDragging=true;
+    startX=e.clientX-translateX;
+    startY=e.clientY-translateY;
 });
 
-renderFeed();
+document.addEventListener("mousemove",e=>{
+    if(!isDragging) return;
+    translateX=e.clientX-startX;
+    translateY=e.clientY-startY;
+    updateTransform();
+});
+
+document.addEventListener("mouseup",()=>isDragging=false);
+
+img.addEventListener("dblclick",()=>{
+    if(scale===1) scale=2;
+    else resetZoom();
+    updateTransform();
+});
 
 </script>
+
 </body>
 </html>
