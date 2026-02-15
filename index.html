@@ -1,87 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Private Photo Feed</title>
+
 <style>
 body{
-    font-family: Arial, sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
     margin:0;
-    background:#fafafa;
+    background:#f5f5f7;
 }
+
+/* HEADER */
 header{
     background:white;
-    padding:15px;
+    padding:20px;
     position:sticky;
     top:0;
-    box-shadow:0 2px 6px rgba(0,0,0,0.05);
     z-index:10;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
-h1{
-    margin:0;
+header h1{
+    margin:0 0 10px 0;
 }
-.container{
-    max-width:700px;
-    margin:auto;
-    padding:20px;
+
+/* SEARCH */
+.searchbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
 }
-.post{
-    background:white;
-    border-radius:12px;
-    margin-bottom:25px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.05);
-    overflow:hidden;
-}
-.post img{
-    width:100%;
-    cursor:pointer;
-}
-.post-content{
-    padding:15px;
-}
-.description{
-    margin-bottom:10px;
-}
-.date{
-    font-size:12px;
-    color:gray;
+input,textarea{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    font-size:14px;
 }
 button{
     padding:10px 15px;
     border:none;
     border-radius:8px;
-    background:#007bff;
+    background:black;
     color:white;
     cursor:pointer;
 }
 button:hover{
-    background:#0056b3;
+    opacity:0.8;
 }
-input, textarea{
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+}
+
+/* CREATE POST */
+.create-post{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.05);
+    margin-bottom:30px;
+}
+
+/* FEED */
+#feed{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:20px;
+}
+
+.post{
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 5px 15px rgba(0,0,0,0.05);
+    cursor:pointer;
+    transition:transform 0.2s ease;
+}
+.post:hover{
+    transform:scale(1.03);
+}
+.post img{
     width:100%;
-    margin-bottom:10px;
-    padding:8px;
+    height:220px;
+    object-fit:cover;
 }
+.post-content{
+    padding:15px;
+}
+.description{
+    font-size:14px;
+    margin-bottom:5px;
+}
+.date{
+    font-size:12px;
+    color:gray;
+}
+
+/* POST MODAL */
+#postModal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.85);
+    justify-content:center;
+    align-items:center;
+    z-index:200;
+}
+.post-modal-content{
+    background:white;
+    width:95%;
+    max-width:1000px;
+    max-height:90%;
+    overflow:auto;
+    border-radius:20px;
+    padding:25px;
+}
+.post-modal-content img{
+    width:100%;
+    margin-bottom:15px;
+    cursor:pointer;
+}
+.close-btn{
+    float:right;
+    font-size:22px;
+    cursor:pointer;
+    color:#999;
+}
+.close-btn:hover{
+    color:black;
+}
+
+/* FULLSCREEN */
 #fullscreen{
     display:none;
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.9);
+    inset:0;
+    background:black;
     justify-content:center;
     align-items:center;
-    z-index:100;
+    z-index:300;
 }
 #fullscreen img{
     max-width:90%;
     max-height:90%;
     cursor:grab;
-    transition:transform 0.2s;
-}
-.searchbar{
-    margin-top:10px;
+    transition:transform 0.15s ease;
 }
 </style>
 </head>
@@ -90,7 +156,7 @@ input, textarea{
 <header>
 <h1>My Private Feed</h1>
 <div class="searchbar">
-<input type="text" id="searchText" placeholder="Search by description...">
+<input type="text" id="searchText" placeholder="Search description...">
 <input type="date" id="searchDate">
 <button onclick="searchPosts()">Search</button>
 <button onclick="clearSearch()">Clear</button>
@@ -99,26 +165,37 @@ input, textarea{
 
 <div class="container">
 
+<div class="create-post">
 <h3>Create Post</h3>
-<textarea id="descriptionInput" placeholder="Write description..."></textarea>
-<input type="file" id="imageInput" multiple accept="image/*">
+<textarea id="descriptionInput" placeholder="Write description..."></textarea><br><br>
+<input type="file" id="imageInput" multiple accept="image/*"><br><br>
 <button onclick="createPost()">Create Post</button>
-
-<hr>
+</div>
 
 <div id="feed"></div>
 
 </div>
 
+<!-- POST DETAIL MODAL -->
+<div id="postModal">
+<div class="post-modal-content">
+<span class="close-btn" onclick="closePostModal()">✕</span>
+<div id="modalImages"></div>
+<div id="modalDescription"></div>
+<div id="modalDate" style="color:gray;font-size:13px;"></div>
+</div>
+</div>
+
+<!-- FULLSCREEN -->
 <div id="fullscreen" onclick="closeFullscreen()">
 <img id="fsImage">
 </div>
 
 <script>
 
-/* =========================
-   INDEXED DB SETUP
-========================= */
+/* =====================
+   INDEXED DB
+===================== */
 
 let db;
 const request = indexedDB.open("PhotoFeedDB",1);
@@ -140,9 +217,9 @@ function addPostToDB(post){
     tx.oncomplete = loadPosts;
 }
 
-/* =========================
+/* =====================
    CREATE POST
-========================= */
+===================== */
 
 function createPost(){
     const desc = document.getElementById("descriptionInput").value;
@@ -153,21 +230,20 @@ function createPost(){
         return;
     }
 
-    let images = [];
-    let loaded = 0;
+    let images=[];
+    let loaded=0;
 
     for(let i=0;i<files.length;i++){
         const reader = new FileReader();
-        reader.onload = function(e){
+        reader.onload=function(e){
             images.push(e.target.result);
             loaded++;
             if(loaded===files.length){
-                const post={
+                addPostToDB({
                     description:desc,
                     images:images,
                     date:new Date().toISOString().split("T")[0]
-                };
-                addPostToDB(post);
+                });
                 document.getElementById("descriptionInput").value="";
                 document.getElementById("imageInput").value="";
             }
@@ -176,19 +252,18 @@ function createPost(){
     }
 }
 
-/* =========================
-   LOAD POSTS
-========================= */
+/* =====================
+   LOAD & RENDER
+===================== */
 
 function loadPosts(){
-    const feed = document.getElementById("feed");
+    const feed=document.getElementById("feed");
     feed.innerHTML="";
+    const tx=db.transaction("posts","readonly");
+    const store=tx.objectStore("posts");
 
-    const tx = db.transaction("posts","readonly");
-    const store = tx.objectStore("posts");
-
-    store.openCursor(null,"prev").onsuccess = function(e){
-        const cursor = e.target.result;
+    store.openCursor(null,"prev").onsuccess=function(e){
+        const cursor=e.target.result;
         if(cursor){
             renderPost(cursor.value);
             cursor.continue();
@@ -197,26 +272,25 @@ function loadPosts(){
 }
 
 function renderPost(post){
-    const feed = document.getElementById("feed");
+    const feed=document.getElementById("feed");
 
-    const postDiv = document.createElement("div");
+    const postDiv=document.createElement("div");
     postDiv.className="post";
 
-    post.images.forEach(img=>{
-        const image = document.createElement("img");
-        image.src = img;
-        image.onclick = ()=>openFullscreen(img);
-        postDiv.appendChild(image);
-    });
+    const img=document.createElement("img");
+    img.src=post.images[0];
+    postDiv.appendChild(img);
 
-    const content = document.createElement("div");
+    const content=document.createElement("div");
     content.className="post-content";
 
-    const desc = document.createElement("div");
+    const desc=document.createElement("div");
     desc.className="description";
-    desc.innerText=post.description;
+    desc.innerText=post.description.length>100 
+        ? post.description.substring(0,100)+"..."
+        : post.description;
 
-    const date = document.createElement("div");
+    const date=document.createElement("div");
     date.className="date";
     date.innerText=post.date;
 
@@ -224,27 +298,29 @@ function renderPost(post){
     content.appendChild(date);
     postDiv.appendChild(content);
 
+    postDiv.onclick=()=>openPostModal(post);
+
     feed.appendChild(postDiv);
 }
 
-/* =========================
+/* =====================
    SEARCH
-========================= */
+===================== */
 
 function searchPosts(){
-    const text = document.getElementById("searchText").value.toLowerCase();
-    const date = document.getElementById("searchDate").value;
+    const text=document.getElementById("searchText").value.toLowerCase();
+    const date=document.getElementById("searchDate").value;
 
-    const feed = document.getElementById("feed");
+    const feed=document.getElementById("feed");
     feed.innerHTML="";
 
-    const tx = db.transaction("posts","readonly");
-    const store = tx.objectStore("posts");
+    const tx=db.transaction("posts","readonly");
+    const store=tx.objectStore("posts");
 
-    store.openCursor(null,"prev").onsuccess = function(e){
-        const cursor = e.target.result;
+    store.openCursor(null,"prev").onsuccess=function(e){
+        const cursor=e.target.result;
         if(cursor){
-            const post = cursor.value;
+            const post=cursor.value;
             if(
                 (text==="" || post.description.toLowerCase().includes(text)) &&
                 (date==="" || post.date===date)
@@ -262,15 +338,40 @@ function clearSearch(){
     loadPosts();
 }
 
-/* =========================
-   FULLSCREEN + ZOOM
-========================= */
+/* =====================
+   POST MODAL
+===================== */
 
-let scale=1;
-let translateX=0;
-let translateY=0;
-let isDragging=false;
-let startX,startY;
+function openPostModal(post){
+    const modal=document.getElementById("postModal");
+    const imagesContainer=document.getElementById("modalImages");
+    const desc=document.getElementById("modalDescription");
+    const date=document.getElementById("modalDate");
+
+    imagesContainer.innerHTML="";
+
+    post.images.forEach(img=>{
+        const image=document.createElement("img");
+        image.src=img;
+        image.onclick=()=>openFullscreen(img);
+        imagesContainer.appendChild(image);
+    });
+
+    desc.innerText=post.description;
+    date.innerText=post.date;
+
+    modal.style.display="flex";
+}
+
+function closePostModal(){
+    document.getElementById("postModal").style.display="none";
+}
+
+/* =====================
+   FULLSCREEN + ZOOM
+===================== */
+
+let scale=1,translateX=0,translateY=0,isDragging=false,startX,startY;
 
 function openFullscreen(src){
     const fs=document.getElementById("fullscreen");
@@ -285,36 +386,33 @@ function closeFullscreen(){
 }
 
 function resetZoom(){
-    scale=1;
-    translateX=0;
-    translateY=0;
+    scale=1;translateX=0;translateY=0;
     updateTransform();
 }
 
 function updateTransform(){
-    const img=document.getElementById("fsImage");
-    img.style.transform=`translate(${translateX}px,${translateY}px) scale(${scale})`;
+    document.getElementById("fsImage").style.transform=
+        `translate(${translateX}px,${translateY}px) scale(${scale})`;
 }
 
-const img=document.getElementById("fsImage");
+const fsImage=document.getElementById("fsImage");
 
-img.addEventListener("wheel",e=>{
+fsImage.addEventListener("wheel",e=>{
     e.preventDefault();
-    if(e.deltaY<0) scale+=0.1;
-    else scale-=0.1;
-    if(scale<1) scale=1;
+    scale+=e.deltaY<0?0.1:-0.1;
+    if(scale<1)scale=1;
     updateTransform();
 });
 
-img.addEventListener("mousedown",e=>{
-    if(scale<=1) return;
+fsImage.addEventListener("mousedown",e=>{
+    if(scale<=1)return;
     isDragging=true;
     startX=e.clientX-translateX;
     startY=e.clientY-translateY;
 });
 
 document.addEventListener("mousemove",e=>{
-    if(!isDragging) return;
+    if(!isDragging)return;
     translateX=e.clientX-startX;
     translateY=e.clientY-startY;
     updateTransform();
@@ -322,13 +420,11 @@ document.addEventListener("mousemove",e=>{
 
 document.addEventListener("mouseup",()=>isDragging=false);
 
-img.addEventListener("dblclick",()=>{
-    if(scale===1) scale=2;
-    else resetZoom();
+fsImage.addEventListener("dblclick",()=>{
+    scale=scale===1?2:1;
     updateTransform();
 });
 
 </script>
-
 </body>
 </html>
