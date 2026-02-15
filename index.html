@@ -3,239 +3,755 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Private Photo Feed</title>
+    <title>private · roll · gallery</title>
     <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+            background: #fafafa;
+            padding: 1.5rem 1rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            color: #1e1e2f;
         }
-        #upload {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #fff;
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        h1 {
+            font-weight: 500;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(145deg, #262636, #3a3a4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .search-bar {
+            flex: 2;
+            min-width: 240px;
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+            padding: 0.3rem 0.3rem 0.3rem 1rem;
+            border-radius: 2.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
             border: 1px solid #ddd;
-            border-radius: 5px;
         }
-        #upload input[type="file"] {
-            margin-bottom: 10px;
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 0.6rem 0;
+            font-size: 1rem;
         }
-        #upload textarea {
-            width: 100%;
-            height: 60px;
-            margin-bottom: 10px;
-        }
-        #upload button {
-            padding: 10px 20px;
-            background-color: #3897f0;
+        .search-bar button {
+            background: #2d2d3c;
+            border: none;
             color: white;
-            border: none;
-            border-radius: 5px;
+            padding: 0.6rem 1.8rem;
+            border-radius: 2.5rem;
+            font-weight: 500;
             cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid #2d2d3c;
         }
-        #search-container {
-            margin-bottom: 20px;
+        .search-bar button:hover {
+            background: #3f3f55;
+            border-color: #3f3f55;
         }
-        #search {
-            padding: 10px;
-            width: 300px;
-            margin-right: 10px;
-        }
-        #clear-search {
-            padding: 10px 20px;
-            background-color: #ddd;
-            border: none;
-            border-radius: 5px;
+        .upload-btn {
+            background: white;
+            border: 1px solid #ccc;
+            padding: 0.6rem 1.8rem;
+            border-radius: 2.5rem;
+            font-weight: 500;
             cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: 0.15s;
+            font-size: 1rem;
         }
-        #feed {
+        .upload-btn:hover {
+            background: #f4f4f6;
+            border-color: #888;
+        }
+        /* post grid */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.8rem;
         }
-        .post {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .post-card {
+            background: white;
+            border-radius: 20px;
             overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+            border: 1px solid #efefef;
+            transition: transform 0.1s ease, box-shadow 0.2s;
             cursor: pointer;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
         }
-        .post img {
+        .post-card:hover {
+            box-shadow: 0 12px 28px rgba(0,0,0,0.07);
+            transform: scale(1.01);
+        }
+        .thumb-container {
+            flex: 1;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .thumb-container img {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover;
             display: block;
         }
+        .multi-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(2px);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .card-footer {
+            padding: 0.7rem 1rem;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #5e5e6e;
+        }
+        .card-desc {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
+        }
+        .card-date {
+            font-feature-settings: 'tnum';
+        }
+        /* modal overlay */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.8);
-            justify-content: center;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15,15,20,0.85);
+            backdrop-filter: blur(5px);
             align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
         }
         .modal-content {
-            background-color: #fff;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 800px;
-            border-radius: 5px;
-            position: relative;
+            background: #111117;
+            border-radius: 32px;
+            width: 90vw;
+            max-width: 1000px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            border: 1px solid #2e2e3a;
         }
-        .close {
+        .modal-header {
+            padding: 1rem 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #eee;
+            border-bottom: 1px solid #2a2a33;
+        }
+        .modal-header h3 {
+            font-weight: 400;
+            font-size: 1.3rem;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .modal-controls {
+            display: flex;
+            gap: 1rem;
+        }
+        .modal-controls button {
+            background: transparent;
+            border: 1px solid #4a4a5a;
+            color: #f0f0f0;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.1s;
+        }
+        .modal-controls button:hover {
+            background: #2d2d3c;
+            border-color: #6a6a80;
+        }
+        .image-area {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: #0a0a0e;
+            position: relative;
+            overflow: auto;
+        }
+        .image-container {
+            display: inline-block;
+            max-width: 100%;
+            max-height: 100%;
+            transition: transform 0.1s ease;
+            cursor: zoom-in;
+        }
+        .image-container.zoomed {
+            cursor: zoom-out;
+            transform: scale(1.8);
+            transform-origin: center center;
+            will-change: transform;
+        }
+        .image-container img {
+            display: block;
+            max-width: 100%;
+            max-height: 65vh;
+            width: auto;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            background: #1f1f2b;
+        }
+        .nav-arrow {
             position: absolute;
-            top: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(40,40,50,0.8);
+            border: 1px solid #5a5a70;
+            color: white;
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            user-select: none;
+            transition: 0.1s;
+        }
+        .nav-arrow:hover {
+            background: rgba(80,80,110,0.9);
+        }
+        .nav-arrow.left {
+            left: 20px;
+        }
+        .nav-arrow.right {
             right: 20px;
+        }
+        .modal-footer {
+            padding: 0.8rem 1.8rem;
             color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
+            border-top: 1px solid #2a2a33;
+            display: flex;
+            gap: 2rem;
+            font-size: 0.9rem;
+        }
+        .delete-post-btn {
+            background: #3a1e1e;
+            border: none;
+            color: #ffbaba;
+            padding: 0.3rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #8b4b4b;
+        }
+        .delete-post-btn:hover {
+            background: #5f2f2f;
+            color: white;
+        }
+        /* new post floating form */
+        .upload-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+        }
+        .upload-overlay.active {
+            display: flex;
+        }
+        .upload-card {
+            background: white;
+            border-radius: 32px;
+            width: 500px;
+            max-width: 90vw;
+            padding: 2rem;
+            box-shadow: 0 40px 70px rgba(0,0,0,0.3);
+        }
+        .upload-card h2 {
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+        .upload-card input, .upload-card textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            margin: 0.5rem 0 1.2rem;
+            border: 1px solid #ccc;
+            border-radius: 24px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        .upload-card textarea {
+            min-height: 80px;
+        }
+        .upload-card .file-info {
+            font-size: 0.9rem;
+            color: #444;
+            margin: 0.5rem 0;
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.8rem;
+        }
+        .button-group button {
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            border: none;
+            font-size: 1rem;
             cursor: pointer;
         }
-        .close:hover {
-            color: black;
+        .button-group .primary {
+            background: #2d2d3c;
+            color: white;
         }
-        #carousel {
-            display: flex;
-            overflow-x: auto;
-            margin-bottom: 20px;
+        .button-group .secondary {
+            background: #eaeef2;
         }
-        .carousel-img {
-            flex: 0 0 auto;
-            max-width: 100%;
-            height: auto;
-            margin-right: 10px;
-            cursor: zoom-in;
-            transition: transform 0.3s;
-        }
-        .carousel-img.zoomed {
-            cursor: zoom-out;
-            transform: scale(2);
-        }
-        #modal-desc, #modal-date {
-            margin: 10px 0;
+        .empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #777;
+            padding: 4rem 1rem;
+            background: #f2f2f8;
+            border-radius: 60px;
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
-    <h1>My Private Photo Feed</h1>
-    <div id="upload">
-        <input type="file" id="files" multiple accept="image/*">
-        <textarea id="desc" placeholder="Enter a description..."></textarea>
-        <button onclick="uploadPost()">Post</button>
-    </div>
-    <div id="search-container">
-        <input type="text" id="search" placeholder="Search by description or date (YYYY-MM-DD)" oninput="performSearch()">
-        <button id="clear-search" onclick="clearSearch()">Clear</button>
-    </div>
-    <div id="feed"></div>
-    <div id="modal" class="modal">
+    <header>
+        <h1>◉ roll · private</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search by description or date (YYYY-MM-DD)" autocomplete="off">
+            <button id="searchBtn">Search</button>
+        </div>
+        <button class="upload-btn" id="showUploadBtn">+ New post</button>
+    </header>
+
+    <div id="postGrid" class="grid"></div>
+
+    <!-- modal for single post view -->
+    <div id="postModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div id="carousel"></div>
-            <p id="modal-desc"></p>
-            <p id="modal-date"></p>
+            <div class="modal-header">
+                <h3 id="modalDesc"></h3>
+                <div class="modal-controls">
+                    <button id="closeModalBtn">✕ Close</button>
+                </div>
+            </div>
+            <div class="image-area" id="modalImageArea">
+                <div class="nav-arrow left" id="prevImageBtn">‹</div>
+                <div class="nav-arrow right" id="nextImageBtn">›</div>
+                <div class="image-container" id="zoomContainer">
+                    <img id="modalImage" alt="" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="modalDate"></span>
+                <span id="modalCounter"></span>
+                <button class="delete-post-btn" id="deletePostBtn">Delete post</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- upload overlay -->
+    <div id="uploadOverlay" class="upload-overlay">
+        <div class="upload-card">
+            <h2>create new post</h2>
+            <label>Description</label>
+            <textarea id="postDesc" placeholder="write a caption ..."></textarea>
+            
+            <label>Date (optional)</label>
+            <input type="date" id="postDate" />
+            
+            <label>Photos (multiple allowed)</label>
+            <input type="file" id="imageUpload" multiple accept="image/*" />
+            <div class="file-info" id="fileCount"></div>
+            
+            <div class="button-group">
+                <button class="secondary" id="cancelUploadBtn">Cancel</button>
+                <button class="primary" id="savePostBtn">Publish</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let posts = JSON.parse(localStorage.getItem('posts')) || [];
-        let currentFilter = '';
+        (function() {
+            // --- IndexedDB setup ---
+            const DB_NAME = 'PrivateRollDB';
+            const STORE_NAME = 'posts';
+            const DB_VERSION = 1;
 
-        function renderFeed(filter = '') {
-            const feed = document.getElementById('feed');
-            feed.innerHTML = '';
-            posts.forEach(post => {
-                const lowerDesc = post.desc.toLowerCase();
-                const lowerFilter = filter.toLowerCase();
-                if (filter === '' || lowerDesc.includes(lowerFilter) || post.date.includes(lowerFilter)) {
-                    const postDiv = document.createElement('div');
-                    postDiv.className = 'post';
-                    postDiv.onclick = () => openModal(post.id);
-                    const img = document.createElement('img');
-                    img.src = post.images[0]; // Use first image as thumbnail
-                    postDiv.appendChild(img);
-                    feed.appendChild(postDiv);
+            let db = null;
+
+            function openDB() {
+                return new Promise((resolve, reject) => {
+                    if (db) return resolve(db);
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => {
+                        db = request.result;
+                        resolve(db);
+                    };
+                    request.onupgradeneeded = (ev) => {
+                        const db = ev.target.result;
+                        if (!db.objectStoreNames.contains(STORE_NAME)) {
+                            // auto-increment id, store blobs directly
+                            const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                            store.createIndex('by_date', 'date');
+                            store.createIndex('by_description', 'description');
+                        }
+                    };
+                });
+            }
+
+            // --- helper: convert files to blobs array ---
+            async function filesToBlobs(fileList) {
+                const blobs = [];
+                for (let i = 0; i < fileList.length; i++) {
+                    const file = fileList[i];
+                    const blob = new Blob([await file.arrayBuffer()], { type: file.type });
+                    blobs.push(blob);
+                }
+                return blobs;
+            }
+
+            // --- save post (description, date, blobs) ---
+            async function savePost(description, date, blobs) {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const post = {
+                    description: description || '',
+                    date: date || new Date().toISOString().split('T')[0],
+                    images: blobs,  // array of Blob
+                    createdAt: new Date().toISOString()
+                };
+                return new Promise((resolve, reject) => {
+                    const request = store.add(post);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            // --- load all posts (with blob data) ---
+            async function loadAllPosts() {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                return new Promise((resolve, reject) => {
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result || []);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            // --- delete post by id ---
+            async function deletePostById(id) {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                return new Promise((resolve, reject) => {
+                    const request = store.delete(id);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            // --- search posts (by description substring or exact date match) ---
+            async function searchPosts(query) {
+                if (!query.trim()) return loadAllPosts();
+                const all = await loadAllPosts();
+                const lower = query.toLowerCase();
+                return all.filter(p => {
+                    const descMatch = p.description.toLowerCase().includes(lower);
+                    const dateMatch = p.date.includes(lower);  // YYYY-MM-DD format
+                    return descMatch || dateMatch;
+                });
+            }
+
+            // --- rendering grid ---
+            const grid = document.getElementById('postGrid');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            let currentPosts = [];
+
+            // revoke object urls to avoid memory leak
+            function revokeThumbUrls(post) {
+                if (post._urls) {
+                    post._urls.forEach(url => URL.revokeObjectURL(url));
+                }
+            }
+
+            async function renderGrid(posts) {
+                // revoke old urls from previous currentPosts
+                if (currentPosts) {
+                    currentPosts.forEach(revokeThumbUrls);
+                }
+                currentPosts = posts || [];
+
+                if (!posts || posts.length === 0) {
+                    grid.innerHTML = `<div class="empty-message">📸 no posts yet — click "+ New post"</div>`;
+                    return;
+                }
+
+                let html = '';
+                for (let post of posts) {
+                    const firstImage = post.images && post.images[0];
+                    if (!firstImage) continue;
+
+                    // create object url (will be stored temporarily on post for cleanup)
+                    const url = URL.createObjectURL(firstImage);
+                    if (!post._urls) post._urls = [];
+                    post._urls.push(url);
+
+                    const multi = post.images.length > 1 ? `<span class="multi-badge">${post.images.length}</span>` : '';
+                    const desc = post.description || 'untitled';
+                    const date = post.date || 'unknown';
+                    html += `
+                        <div class="post-card" data-post-id="${post.id}">
+                            <div class="thumb-container">
+                                <img src="${url}" alt="thumb" loading="lazy">
+                                ${multi}
+                            </div>
+                            <div class="card-footer">
+                                <span class="card-desc">${desc.substring(0,25)}${desc.length>25?'…':''}</span>
+                                <span class="card-date">${date}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                grid.innerHTML = html;
+
+                // attach click listeners to cards
+                document.querySelectorAll('.post-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const id = Number(card.dataset.postId);
+                        const post = posts.find(p => p.id === id);
+                        if (post) openModal(post);
+                    });
+                });
+            }
+
+            // --- modal logic ---
+            const modal = document.getElementById('postModal');
+            const modalDesc = document.getElementById('modalDesc');
+            const modalDate = document.getElementById('modalDate');
+            const modalCounter = document.getElementById('modalCounter');
+            const modalImage = document.getElementById('modalImage');
+            const zoomContainer = document.getElementById('zoomContainer');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const prevBtn = document.getElementById('prevImageBtn');
+            const nextBtn = document.getElementById('nextImageBtn');
+            const deletePostBtn = document.getElementById('deletePostBtn');
+
+            let currentModalPost = null;
+            let currentImageIndex = 0;
+            let currentModalUrls = []; // for cleanup
+
+            function revokeModalUrls() {
+                currentModalUrls.forEach(url => URL.revokeObjectURL(url));
+                currentModalUrls = [];
+            }
+
+            function openModal(post) {
+                if (currentModalPost) revokeModalUrls();
+                currentModalPost = post;
+                currentImageIndex = 0;
+                modalDesc.textContent = post.description || 'no description';
+                modalDate.textContent = post.date || '';
+                updateModalImage();
+                modal.classList.add('active');
+            }
+
+            function updateModalImage() {
+                if (!currentModalPost) return;
+                const images = currentModalPost.images;
+                if (!images || images.length === 0) return;
+                const blob = images[currentImageIndex];
+                const url = URL.createObjectURL(blob);
+                currentModalUrls.push(url);
+                modalImage.src = url;
+                modalCounter.textContent = `${currentImageIndex+1} / ${images.length}`;
+                // reset zoom
+                zoomContainer.classList.remove('zoomed');
+            }
+
+            // navigation
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!currentModalPost) return;
+                const total = currentModalPost.images.length;
+                currentImageIndex = (currentImageIndex - 1 + total) % total;
+                updateModalImage();
+            });
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!currentModalPost) return;
+                const total = currentModalPost.images.length;
+                currentImageIndex = (currentImageIndex + 1) % total;
+                updateModalImage();
+            });
+
+            // zoom on image click
+            zoomContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+                zoomContainer.classList.toggle('zoomed');
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                modal.classList.remove('active');
+                revokeModalUrls();
+                currentModalPost = null;
+            });
+
+            // delete post from modal
+            deletePostBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!currentModalPost) return;
+                const id = currentModalPost.id;
+                if (confirm('Delete this post permanently?')) {
+                    await deletePostById(id);
+                    // refresh grid
+                    const posts = await loadAllPosts();
+                    renderGrid(posts);
+                    modal.classList.remove('active');
+                    revokeModalUrls();
+                    currentModalPost = null;
                 }
             });
-        }
 
-        function uploadPost() {
-            const files = document.getElementById('files').files;
-            const desc = document.getElementById('desc').value;
-            if (files.length === 0) {
-                alert('Please select at least one image.');
-                return;
+            // close modal if click outside content? simple: click on modal closes? we'll not, only button
+
+            // --- upload overlay ---
+            const uploadOverlay = document.getElementById('uploadOverlay');
+            const showUploadBtn = document.getElementById('showUploadBtn');
+            const cancelUploadBtn = document.getElementById('cancelUploadBtn');
+            const savePostBtn = document.getElementById('savePostBtn');
+            const postDesc = document.getElementById('postDesc');
+            const postDate = document.getElementById('postDate');
+            const imageUpload = document.getElementById('imageUpload');
+            const fileCount = document.getElementById('fileCount');
+
+            showUploadBtn.addEventListener('click', () => {
+                postDesc.value = '';
+                postDate.value = new Date().toISOString().split('T')[0];
+                imageUpload.value = '';
+                fileCount.textContent = '';
+                uploadOverlay.classList.add('active');
+            });
+
+            cancelUploadBtn.addEventListener('click', () => {
+                uploadOverlay.classList.remove('active');
+            });
+
+            imageUpload.addEventListener('change', (e) => {
+                const files = e.target.files;
+                fileCount.textContent = files.length ? `${files.length} file(s) selected` : '';
+            });
+
+            savePostBtn.addEventListener('click', async () => {
+                const files = imageUpload.files;
+                if (!files || files.length === 0) {
+                    alert('Please select at least one image');
+                    return;
+                }
+                const desc = postDesc.value.trim();
+                const date = postDate.value || new Date().toISOString().split('T')[0];
+                
+                try {
+                    const blobs = await filesToBlobs(files);
+                    await savePost(desc, date, blobs);
+                    uploadOverlay.classList.remove('active');
+                    // refresh grid
+                    const posts = await loadAllPosts();
+                    renderGrid(posts);
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to save post');
+                }
+            });
+
+            // --- search ---
+            async function performSearch() {
+                const query = searchInput.value;
+                const results = await searchPosts(query);
+                renderGrid(results);
             }
-            const date = new Date().toISOString().split('T')[0];
-            const readerPromises = Array.from(files).map(file => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
+
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') performSearch();
             });
-            Promise.all(readerPromises).then(images => {
-                const post = { id: Date.now(), desc, date, images };
-                posts.unshift(post); // Add to beginning for newest first
-                localStorage.setItem('posts', JSON.stringify(posts));
-                renderFeed(currentFilter);
-                document.getElementById('files').value = '';
-                document.getElementById('desc').value = '';
-            }).catch(error => {
-                console.error('Error reading files:', error);
-                alert('Failed to upload images.');
+
+            // --- initial load ---
+            (async () => {
+                try {
+                    const posts = await loadAllPosts();
+                    renderGrid(posts);
+                } catch (e) {
+                    console.warn('indexedDB init error', e);
+                    grid.innerHTML = `<div class="empty-message">⚠️ could not load database. try a modern browser.</div>`;
+                }
+            })();
+
+            // clean up object URLs on page unload (optional)
+            window.addEventListener('beforeunload', () => {
+                if (currentPosts) {
+                    currentPosts.forEach(revokeThumbUrls);
+                }
             });
-        }
 
-        function openModal(id) {
-            const post = posts.find(p => p.id === id);
-            if (!post) return;
-            const carousel = document.getElementById('carousel');
-            carousel.innerHTML = '';
-            post.images.forEach(src => {
-                const img = document.createElement('img');
-                img.src = src;
-                img.className = 'carousel-img';
-                img.onclick = () => img.classList.toggle('zoomed');
-                carousel.appendChild(img);
-            });
-            document.getElementById('modal-desc').textContent = post.desc;
-            document.getElementById('modal-date').textContent = 'Posted on: ' + post.date;
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        function performSearch() {
-            currentFilter = document.getElementById('search').value;
-            renderFeed(currentFilter);
-        }
-
-        function clearSearch() {
-            document.getElementById('search').value = '';
-            currentFilter = '';
-            renderFeed();
-        }
-
-        // Initial render
-        renderFeed();
-
-        // Close modal when clicking outside content
-        window.onclick = function(event) {
-            const modal = document.getElementById('modal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
+        })();
     </script>
 </body>
-</html>
+</html
