@@ -7,132 +7,182 @@
 
 <style>
 :root {
-    --bg: #fafafa;
-    --card: #ffffff;
-    --text: #111;
-    --border: #ddd;
-    --accent: #0095f6;
+    --bg:#fafafa;
+    --card:#ffffff;
+    --text:#111;
+    --border:#ddd;
+    --accent:#0095f6;
 }
-
 body.dark {
-    --bg: #121212;
-    --card: #1e1e1e;
-    --text: #f1f1f1;
-    --border: #333;
-    --accent: #4dabf7;
+    --bg:#121212;
+    --card:#1e1e1e;
+    --text:#f1f1f1;
+    --border:#333;
+    --accent:#4dabf7;
 }
 
-* { box-sizing: border-box; }
+*{box-sizing:border-box;}
 
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    transition: 0.3s ease;
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    transition:.3s ease;
 }
 
-header {
-    background: var(--card);
-    padding: 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
+header{
+    background:var(--card);
+    padding:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid var(--border);
+    font-weight:600;
 }
 
-.toggle-dark { cursor: pointer; font-size: 14px; padding: 6px 10px; border-radius: 20px; border: 1px solid var(--border); }
-
-.container { max-width: 950px; margin: auto; padding: 20px; }
-
-.post-form {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
+.toggle-dark{
+    cursor:pointer;
+    padding:6px 10px;
+    border:1px solid var(--border);
+    border-radius:20px;
+    font-size:14px;
 }
 
-textarea {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px;
-    resize: none;
-    margin-bottom: 12px;
-    background: transparent;
-    color: var(--text);
+.container{
+    max-width:950px;
+    margin:auto;
+    padding:20px;
 }
 
-input[type="file"], input[type="text"] {
-    margin-bottom: 12px;
-    padding: 6px;
-    width: 100%;
-    border-radius: 6px;
-    border: 1px solid var(--border);
+.post-form{
+    background:var(--card);
+    padding:20px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    margin-bottom:20px;
 }
 
-button { background: var(--accent); border: none; padding: 8px 14px; color: white; border-radius: 6px; cursor: pointer; font-weight: 500; }
-button:hover { opacity: 0.9; }
-
-.feed {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
+textarea{
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px;
+    resize:none;
+    margin-bottom:12px;
+    background:transparent;
+    color:var(--text);
 }
 
-.post { position: relative; cursor: pointer; transition: transform 0.2s ease; }
-.post:hover { transform: scale(1.02); }
-.post img { width: 100%; height: 260px; object-fit: cover; border-radius: 12px; }
-
-.overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.4);
-    border-radius: 12px;
-    opacity: 0;
-    display: flex;
-    justify-content: center; align-items: center;
-    color: white; font-size: 18px; gap: 10px;
-    transition: 0.2s;
+input[type="file"], input[type="text"]{
+    width:100%;
+    padding:8px;
+    margin-bottom:12px;
+    border-radius:6px;
+    border:1px solid var(--border);
 }
 
-.post:hover .overlay { opacity: 1; }
-
-.modal, .fullscreen {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.9);
-    justify-content: center; align-items: center;
-    flex-direction: column;
-    padding: 20px;
-    z-index: 999;
+button{
+    background:var(--accent);
+    border:none;
+    padding:8px 14px;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
 }
 
-.modal-content {
-    background: var(--card);
-    max-width: 900px; width: 100%;
-    border-radius: 12px;
-    display: flex; flex-direction: column; overflow: hidden;
-    animation: fadeIn 0.3s ease;
+.feed{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:20px;
 }
 
-.modal-image { text-align: center; background: black; }
-.modal-image img { max-height: 500px; max-width: 100%; cursor: zoom-in; }
+.post{
+    position:relative;
+    cursor:pointer;
+}
 
-.modal-info { padding: 15px; }
-.modal-caption { margin-bottom: 10px; font-size: 14px; }
-.modal-date { font-size: 12px; color: gray; margin-bottom: 10px; }
-.modal-controls { display: flex; justify-content: space-between; margin-top: 10px; }
-.control-left, .control-right { display: flex; gap: 8px; }
-.modal button { background: var(--accent); }
+.post img{
+    width:100%;
+    height:260px;
+    object-fit:cover;
+    border-radius:12px;
+}
 
-.fullscreen img { max-width: 95%; max-height: 95%; cursor: zoom-out; }
+.overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.4);
+    border-radius:12px;
+    opacity:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    font-size:18px;
+    transition:.2s;
+}
 
-@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.post:hover .overlay{opacity:1;}
 
-@media(max-width: 700px){ .modal-content { flex-direction: column; } }
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.85);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:999;
+}
 
+.modal-content{
+    background:var(--card);
+    width:100%;
+    max-width:900px;
+    border-radius:12px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+}
+
+.modal-image{
+    text-align:center;
+    background:black;
+}
+
+.modal-image img{
+    max-height:500px;
+    max-width:100%;
+    cursor:zoom-in;
+}
+
+.modal-info{
+    padding:15px;
+}
+
+.modal-controls{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+}
+
+.fullscreen{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.95);
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    z-index:9999;
+}
+
+.fullscreen img{
+    cursor:grab;
+    user-select:none;
+    transition:transform .1s ease;
+}
 </style>
 </head>
 <body>
@@ -150,149 +200,236 @@ button:hover { opacity: 0.9; }
     <button onclick="createPost()">Create Post</button>
 </div>
 
-<div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search by caption or date..." oninput="renderFeed()">
-</div>
+<input type="text" id="searchInput" placeholder="Search by caption or date..." oninput="renderFeed()">
 
 <div class="feed" id="feed"></div>
 
 </div>
 
 <div class="modal" id="modal">
-    <div class="modal-content">
-        <div class="modal-image">
-            <img id="modalImage" onclick="openFullscreen()">
-        </div>
-        <div class="modal-info">
-            <div class="modal-caption" id="modalCaption"></div>
-            <div class="modal-date" id="modalDate"></div>
+<div class="modal-content">
+<div class="modal-image">
+<img id="modalImage" onclick="openFullscreen()">
+</div>
+<div class="modal-info">
+<div id="modalCaption"></div>
+<div id="modalDate" style="font-size:12px;color:gray;margin-top:4px;"></div>
 
-            <div class="modal-controls">
-                <div class="control-left">
-                    <button onclick="prevImage()">◀</button>
-                    <button onclick="nextImage()">▶</button>
-                </div>
-                <div class="control-right">
-                    <button onclick="likePost()">❤️ Like</button>
-                    <button onclick="deletePost()">🗑 Delete</button>
-                    <button onclick="closeModal()">Close</button>
-                </div>
-            </div>
+<div class="modal-controls">
+<div>
+<button onclick="prevImage()">◀</button>
+<button onclick="nextImage()">▶</button>
+</div>
+<div>
+<button onclick="likePost()">❤️ Like</button>
+<button onclick="deletePost()">🗑 Delete</button>
+<button onclick="closeModal()">Close</button>
+</div>
+</div>
 
-            <div id="imageCounter" style="margin-top:8px;font-size:12px;"></div>
-        </div>
-    </div>
+<div id="imageCounter" style="margin-top:8px;font-size:12px;"></div>
+</div>
+</div>
 </div>
 
 <div class="fullscreen" id="fullscreen" onclick="closeFullscreen()">
-    <img id="fsImage">
+<img id="fsImage">
 </div>
 
 <script>
+
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
-let currentPostIndex = 0;
-let currentImageIndex = 0;
+let currentPostIndex=0;
+let currentImageIndex=0;
 
-function savePosts() { localStorage.setItem("posts", JSON.stringify(posts)); }
+function savePosts(){localStorage.setItem("posts",JSON.stringify(posts));}
 
-function createPost() {
-    const caption = document.getElementById("caption").value;
-    const files = document.getElementById("images").files;
-    if (files.length === 0) return;
+function createPost(){
+    const caption=document.getElementById("caption").value;
+    const files=document.getElementById("images").files;
+    if(files.length===0) return;
 
-    const images = [];
-    let loaded = 0;
+    const images=[];
+    let loaded=0;
 
-    for (let file of files) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
+    for(let file of files){
+        const reader=new FileReader();
+        reader.onload=function(e){
             images.push(e.target.result);
             loaded++;
-            if (loaded === files.length) {
-                posts.unshift({ caption, images, date: new Date().toLocaleString(), likes: 0 });
+            if(loaded===files.length){
+                posts.unshift({
+                    caption,
+                    images,
+                    date:new Date().toLocaleString(),
+                    likes:0
+                });
                 savePosts();
                 renderFeed();
-                document.getElementById("caption").value = "";
-                document.getElementById("images").value = "";
+                document.getElementById("caption").value="";
+                document.getElementById("images").value="";
             }
         };
         reader.readAsDataURL(file);
     }
 }
 
-function renderFeed() {
-    const feed = document.getElementById("feed");
-    feed.innerHTML = "";
-    const query = document.getElementById("searchInput").value.toLowerCase();
+function renderFeed(){
+    const feed=document.getElementById("feed");
+    const query=document.getElementById("searchInput").value.toLowerCase();
+    feed.innerHTML="";
 
-    posts.forEach((post, index) => {
-        if (query && !(post.caption.toLowerCase().includes(query) || post.date.toLowerCase().includes(query))) return;
+    posts.forEach((post,index)=>{
+        if(query && !(post.caption.toLowerCase().includes(query)||post.date.toLowerCase().includes(query))) return;
 
-        const div = document.createElement("div");
-        div.className = "post";
+        const div=document.createElement("div");
+        div.className="post";
+        div.onclick=()=>openModal(index);
 
-        const img = document.createElement("img");
-        img.src = post.images[0];
-        img.onclick = (e)=> { e.stopPropagation(); openFullscreen(index,0); };
+        const img=document.createElement("img");
+        img.src=post.images[0];
+        img.onclick=(e)=>{e.stopPropagation();openFullscreen(index,0);}
         div.appendChild(img);
 
-        div.onclick = () => openModal(index);
-
-        const overlay = document.createElement("div");
-        overlay.className = "overlay";
-        overlay.innerHTML = `❤️ ${post.likes} ${post.images.length > 1 ? "📚" : ""}`;
+        const overlay=document.createElement("div");
+        overlay.className="overlay";
+        overlay.innerHTML=`❤️ ${post.likes}`;
         div.appendChild(overlay);
 
         feed.appendChild(div);
     });
 }
 
-function openModal(index) {
-    currentPostIndex = index;
-    currentImageIndex = 0;
-    document.getElementById("modal").style.display = "flex";
+function openModal(index){
+    currentPostIndex=index;
+    currentImageIndex=0;
+    document.getElementById("modal").style.display="flex";
     updateModal();
 }
 
-function updateModal() {
-    const post = posts[currentPostIndex];
-    document.getElementById("modalImage").src = post.images[currentImageIndex];
-    document.getElementById("modalCaption").innerText = post.caption || "(No caption)";
-    document.getElementById("modalDate").innerText = post.date;
-    document.getElementById("imageCounter").innerText = `Image ${currentImageIndex+1} of ${post.images.length}`;
+function updateModal(){
+    const post=posts[currentPostIndex];
+    document.getElementById("modalImage").src=post.images[currentImageIndex];
+    document.getElementById("modalCaption").innerText=post.caption||"(No caption)";
+    document.getElementById("modalDate").innerText=post.date;
+    document.getElementById("imageCounter").innerText=
+        `Image ${currentImageIndex+1} of ${post.images.length}`;
 }
 
-function closeModal() { document.getElementById("modal").style.display = "none"; }
+function closeModal(){
+    document.getElementById("modal").style.display="none";
+}
 
-function nextImage() { if(currentImageIndex<posts[currentPostIndex].images.length-1){currentImageIndex++; updateModal();} }
-function prevImage() { if(currentImageIndex>0){currentImageIndex--; updateModal();} }
+function nextImage(){
+    if(currentImageIndex<posts[currentPostIndex].images.length-1){
+        currentImageIndex++;
+        updateModal();
+    }
+}
 
-function likePost() { posts[currentPostIndex].likes++; savePosts(); updateModal(); renderFeed(); }
-function deletePost() { if(!confirm("Delete this post?")) return; posts.splice(currentPostIndex,1); savePosts(); closeModal(); renderFeed(); }
-function toggleDark(){document.body.classList.toggle("dark");}
+function prevImage(){
+    if(currentImageIndex>0){
+        currentImageIndex--;
+        updateModal();
+    }
+}
 
-/* =================
-   FULLSCREEN IMAGE
-================= */
+function likePost(){
+    posts[currentPostIndex].likes++;
+    savePosts();
+    renderFeed();
+    updateModal();
+}
+
+function deletePost(){
+    if(!confirm("Delete this post?")) return;
+    posts.splice(currentPostIndex,1);
+    savePosts();
+    closeModal();
+    renderFeed();
+}
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+
+/* FULLSCREEN ZOOM */
+
+let scale=1, isDragging=false, startX, startY, translateX=0, translateY=0;
 
 function openFullscreen(postIndex=currentPostIndex,imgIndex=currentImageIndex){
-    document.getElementById("fullscreen").style.display="flex";
-    document.getElementById("fsImage").src = posts[postIndex].images[imgIndex];
+    const fs=document.getElementById("fullscreen");
+    const img=document.getElementById("fsImage");
+    fs.style.display="flex";
+    img.src=posts[postIndex].images[imgIndex];
+    resetZoom();
 }
 
-function closeFullscreen(){document.getElementById("fullscreen").style.display="none";}
+function closeFullscreen(){
+    document.getElementById("fullscreen").style.display="none";
+    resetZoom();
+}
 
-document.addEventListener("keydown", function(e){
+function resetZoom(){
+    scale=1; translateX=0; translateY=0;
+    updateTransform();
+}
+
+function updateTransform(){
+    const img=document.getElementById("fsImage");
+    img.style.transform=`translate(${translateX}px,${translateY}px) scale(${scale})`;
+}
+
+window.addEventListener("load",function(){
+    const img=document.getElementById("fsImage");
+
+    img.addEventListener("wheel",function(e){
+        e.preventDefault();
+        scale += e.deltaY<0?0.1:-0.1;
+        if(scale<1) scale=1;
+        updateTransform();
+    });
+
+    img.addEventListener("mousedown",function(e){
+        if(scale<=1) return;
+        isDragging=true;
+        img.style.cursor="grabbing";
+        startX=e.clientX-translateX;
+        startY=e.clientY-translateY;
+    });
+
+    document.addEventListener("mousemove",function(e){
+        if(!isDragging) return;
+        translateX=e.clientX-startX;
+        translateY=e.clientY-startY;
+        updateTransform();
+    });
+
+    document.addEventListener("mouseup",function(){
+        isDragging=false;
+        img.style.cursor="grab";
+    });
+
+    img.addEventListener("dblclick",function(){
+        scale=scale===1?2:1;
+        if(scale===1){translateX=0;translateY=0;}
+        updateTransform();
+    });
+});
+
+document.addEventListener("keydown",function(e){
     if(document.getElementById("modal").style.display==="flex"){
         if(e.key==="ArrowRight") nextImage();
         if(e.key==="ArrowLeft") prevImage();
         if(e.key==="Escape") closeModal();
     }
-    if(document.getElementById("fullscreen").style.display==="flex" && e.key==="Escape"){closeFullscreen();}
+    if(document.getElementById("fullscreen").style.display==="flex" && e.key==="Escape"){
+        closeFullscreen();
+    }
 });
 
 renderFeed();
-</script>
 
+</script>
 </body>
 </html>
