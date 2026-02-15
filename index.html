@@ -1,430 +1,241 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Private Photo Feed</title>
-
-<style>
-body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-    margin:0;
-    background:#f5f5f7;
-}
-
-/* HEADER */
-header{
-    background:white;
-    padding:20px;
-    position:sticky;
-    top:0;
-    z-index:10;
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-header h1{
-    margin:0 0 10px 0;
-}
-
-/* SEARCH */
-.searchbar{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-}
-input,textarea{
-    padding:10px;
-    border-radius:8px;
-    border:1px solid #ddd;
-    font-size:14px;
-}
-button{
-    padding:10px 15px;
-    border:none;
-    border-radius:8px;
-    background:black;
-    color:white;
-    cursor:pointer;
-}
-button:hover{
-    opacity:0.8;
-}
-
-.container{
-    max-width:900px;
-    margin:auto;
-    padding:20px;
-}
-
-/* CREATE POST */
-.create-post{
-    background:white;
-    padding:20px;
-    border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.05);
-    margin-bottom:30px;
-}
-
-/* FEED */
-#feed{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-    gap:20px;
-}
-
-.post{
-    background:white;
-    border-radius:15px;
-    overflow:hidden;
-    box-shadow:0 5px 15px rgba(0,0,0,0.05);
-    cursor:pointer;
-    transition:transform 0.2s ease;
-}
-.post:hover{
-    transform:scale(1.03);
-}
-.post img{
-    width:100%;
-    height:220px;
-    object-fit:cover;
-}
-.post-content{
-    padding:15px;
-}
-.description{
-    font-size:14px;
-    margin-bottom:5px;
-}
-.date{
-    font-size:12px;
-    color:gray;
-}
-
-/* POST MODAL */
-#postModal{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.85);
-    justify-content:center;
-    align-items:center;
-    z-index:200;
-}
-.post-modal-content{
-    background:white;
-    width:95%;
-    max-width:1000px;
-    max-height:90%;
-    overflow:auto;
-    border-radius:20px;
-    padding:25px;
-}
-.post-modal-content img{
-    width:100%;
-    margin-bottom:15px;
-    cursor:pointer;
-}
-.close-btn{
-    float:right;
-    font-size:22px;
-    cursor:pointer;
-    color:#999;
-}
-.close-btn:hover{
-    color:black;
-}
-
-/* FULLSCREEN */
-#fullscreen{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:black;
-    justify-content:center;
-    align-items:center;
-    z-index:300;
-}
-#fullscreen img{
-    max-width:90%;
-    max-height:90%;
-    cursor:grab;
-    transition:transform 0.15s ease;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Private Photo Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        #upload {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #upload input[type="file"] {
+            margin-bottom: 10px;
+        }
+        #upload textarea {
+            width: 100%;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+        #upload button {
+            padding: 10px 20px;
+            background-color: #3897f0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #search-container {
+            margin-bottom: 20px;
+        }
+        #search {
+            padding: 10px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        #clear-search {
+            padding: 10px 20px;
+            background-color: #ddd;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #feed {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .post {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .post img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        #carousel {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        .carousel-img {
+            flex: 0 0 auto;
+            max-width: 100%;
+            height: auto;
+            margin-right: 10px;
+            cursor: zoom-in;
+            transition: transform 0.3s;
+        }
+        .carousel-img.zoomed {
+            cursor: zoom-out;
+            transform: scale(2);
+        }
+        #modal-desc, #modal-date {
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
+    <h1>My Private Photo Feed</h1>
+    <div id="upload">
+        <input type="file" id="files" multiple accept="image/*">
+        <textarea id="desc" placeholder="Enter a description..."></textarea>
+        <button onclick="uploadPost()">Post</button>
+    </div>
+    <div id="search-container">
+        <input type="text" id="search" placeholder="Search by description or date (YYYY-MM-DD)" oninput="performSearch()">
+        <button id="clear-search" onclick="clearSearch()">Clear</button>
+    </div>
+    <div id="feed"></div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="carousel"></div>
+            <p id="modal-desc"></p>
+            <p id="modal-date"></p>
+        </div>
+    </div>
 
-<header>
-<h1>My Private Feed</h1>
-<div class="searchbar">
-<input type="text" id="searchText" placeholder="Search description...">
-<input type="date" id="searchDate">
-<button onclick="searchPosts()">Search</button>
-<button onclick="clearSearch()">Clear</button>
-</div>
-</header>
+    <script>
+        let posts = JSON.parse(localStorage.getItem('posts')) || [];
+        let currentFilter = '';
 
-<div class="container">
+        function renderFeed(filter = '') {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '';
+            posts.forEach(post => {
+                const lowerDesc = post.desc.toLowerCase();
+                const lowerFilter = filter.toLowerCase();
+                if (filter === '' || lowerDesc.includes(lowerFilter) || post.date.includes(lowerFilter)) {
+                    const postDiv = document.createElement('div');
+                    postDiv.className = 'post';
+                    postDiv.onclick = () => openModal(post.id);
+                    const img = document.createElement('img');
+                    img.src = post.images[0]; // Use first image as thumbnail
+                    postDiv.appendChild(img);
+                    feed.appendChild(postDiv);
+                }
+            });
+        }
 
-<div class="create-post">
-<h3>Create Post</h3>
-<textarea id="descriptionInput" placeholder="Write description..."></textarea><br><br>
-<input type="file" id="imageInput" multiple accept="image/*"><br><br>
-<button onclick="createPost()">Create Post</button>
-</div>
-
-<div id="feed"></div>
-
-</div>
-
-<!-- POST DETAIL MODAL -->
-<div id="postModal">
-<div class="post-modal-content">
-<span class="close-btn" onclick="closePostModal()">✕</span>
-<div id="modalImages"></div>
-<div id="modalDescription"></div>
-<div id="modalDate" style="color:gray;font-size:13px;"></div>
-</div>
-</div>
-
-<!-- FULLSCREEN -->
-<div id="fullscreen" onclick="closeFullscreen()">
-<img id="fsImage">
-</div>
-
-<script>
-
-/* =====================
-   INDEXED DB
-===================== */
-
-let db;
-const request = indexedDB.open("PhotoFeedDB",1);
-
-request.onupgradeneeded = function(e){
-    db = e.target.result;
-    db.createObjectStore("posts",{keyPath:"id",autoIncrement:true});
-};
-
-request.onsuccess = function(e){
-    db = e.target.result;
-    loadPosts();
-};
-
-function addPostToDB(post){
-    const tx = db.transaction("posts","readwrite");
-    const store = tx.objectStore("posts");
-    store.add(post);
-    tx.oncomplete = loadPosts;
-}
-
-/* =====================
-   CREATE POST
-===================== */
-
-function createPost(){
-    const desc = document.getElementById("descriptionInput").value;
-    const files = document.getElementById("imageInput").files;
-
-    if(files.length===0){
-        alert("Select at least one image");
-        return;
-    }
-
-    let images=[];
-    let loaded=0;
-
-    for(let i=0;i<files.length;i++){
-        const reader = new FileReader();
-        reader.onload=function(e){
-            images.push(e.target.result);
-            loaded++;
-            if(loaded===files.length){
-                addPostToDB({
-                    description:desc,
-                    images:images,
-                    date:new Date().toISOString().split("T")[0]
+        function uploadPost() {
+            const files = document.getElementById('files').files;
+            const desc = document.getElementById('desc').value;
+            if (files.length === 0) {
+                alert('Please select at least one image.');
+                return;
+            }
+            const date = new Date().toISOString().split('T')[0];
+            const readerPromises = Array.from(files).map(file => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
                 });
-                document.getElementById("descriptionInput").value="";
-                document.getElementById("imageInput").value="";
+            });
+            Promise.all(readerPromises).then(images => {
+                const post = { id: Date.now(), desc, date, images };
+                posts.unshift(post); // Add to beginning for newest first
+                localStorage.setItem('posts', JSON.stringify(posts));
+                renderFeed(currentFilter);
+                document.getElementById('files').value = '';
+                document.getElementById('desc').value = '';
+            }).catch(error => {
+                console.error('Error reading files:', error);
+                alert('Failed to upload images.');
+            });
+        }
+
+        function openModal(id) {
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+            const carousel = document.getElementById('carousel');
+            carousel.innerHTML = '';
+            post.images.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.className = 'carousel-img';
+                img.onclick = () => img.classList.toggle('zoomed');
+                carousel.appendChild(img);
+            });
+            document.getElementById('modal-desc').textContent = post.desc;
+            document.getElementById('modal-date').textContent = 'Posted on: ' + post.date;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function performSearch() {
+            currentFilter = document.getElementById('search').value;
+            renderFeed(currentFilter);
+        }
+
+        function clearSearch() {
+            document.getElementById('search').value = '';
+            currentFilter = '';
+            renderFeed();
+        }
+
+        // Initial render
+        renderFeed();
+
+        // Close modal when clicking outside content
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
             }
         };
-        reader.readAsDataURL(files[i]);
-    }
-}
-
-/* =====================
-   LOAD & RENDER
-===================== */
-
-function loadPosts(){
-    const feed=document.getElementById("feed");
-    feed.innerHTML="";
-    const tx=db.transaction("posts","readonly");
-    const store=tx.objectStore("posts");
-
-    store.openCursor(null,"prev").onsuccess=function(e){
-        const cursor=e.target.result;
-        if(cursor){
-            renderPost(cursor.value);
-            cursor.continue();
-        }
-    };
-}
-
-function renderPost(post){
-    const feed=document.getElementById("feed");
-
-    const postDiv=document.createElement("div");
-    postDiv.className="post";
-
-    const img=document.createElement("img");
-    img.src=post.images[0];
-    postDiv.appendChild(img);
-
-    const content=document.createElement("div");
-    content.className="post-content";
-
-    const desc=document.createElement("div");
-    desc.className="description";
-    desc.innerText=post.description.length>100 
-        ? post.description.substring(0,100)+"..."
-        : post.description;
-
-    const date=document.createElement("div");
-    date.className="date";
-    date.innerText=post.date;
-
-    content.appendChild(desc);
-    content.appendChild(date);
-    postDiv.appendChild(content);
-
-    postDiv.onclick=()=>openPostModal(post);
-
-    feed.appendChild(postDiv);
-}
-
-/* =====================
-   SEARCH
-===================== */
-
-function searchPosts(){
-    const text=document.getElementById("searchText").value.toLowerCase();
-    const date=document.getElementById("searchDate").value;
-
-    const feed=document.getElementById("feed");
-    feed.innerHTML="";
-
-    const tx=db.transaction("posts","readonly");
-    const store=tx.objectStore("posts");
-
-    store.openCursor(null,"prev").onsuccess=function(e){
-        const cursor=e.target.result;
-        if(cursor){
-            const post=cursor.value;
-            if(
-                (text==="" || post.description.toLowerCase().includes(text)) &&
-                (date==="" || post.date===date)
-            ){
-                renderPost(post);
-            }
-            cursor.continue();
-        }
-    };
-}
-
-function clearSearch(){
-    document.getElementById("searchText").value="";
-    document.getElementById("searchDate").value="";
-    loadPosts();
-}
-
-/* =====================
-   POST MODAL
-===================== */
-
-function openPostModal(post){
-    const modal=document.getElementById("postModal");
-    const imagesContainer=document.getElementById("modalImages");
-    const desc=document.getElementById("modalDescription");
-    const date=document.getElementById("modalDate");
-
-    imagesContainer.innerHTML="";
-
-    post.images.forEach(img=>{
-        const image=document.createElement("img");
-        image.src=img;
-        image.onclick=()=>openFullscreen(img);
-        imagesContainer.appendChild(image);
-    });
-
-    desc.innerText=post.description;
-    date.innerText=post.date;
-
-    modal.style.display="flex";
-}
-
-function closePostModal(){
-    document.getElementById("postModal").style.display="none";
-}
-
-/* =====================
-   FULLSCREEN + ZOOM
-===================== */
-
-let scale=1,translateX=0,translateY=0,isDragging=false,startX,startY;
-
-function openFullscreen(src){
-    const fs=document.getElementById("fullscreen");
-    const img=document.getElementById("fsImage");
-    img.src=src;
-    fs.style.display="flex";
-    resetZoom();
-}
-
-function closeFullscreen(){
-    document.getElementById("fullscreen").style.display="none";
-}
-
-function resetZoom(){
-    scale=1;translateX=0;translateY=0;
-    updateTransform();
-}
-
-function updateTransform(){
-    document.getElementById("fsImage").style.transform=
-        `translate(${translateX}px,${translateY}px) scale(${scale})`;
-}
-
-const fsImage=document.getElementById("fsImage");
-
-fsImage.addEventListener("wheel",e=>{
-    e.preventDefault();
-    scale+=e.deltaY<0?0.1:-0.1;
-    if(scale<1)scale=1;
-    updateTransform();
-});
-
-fsImage.addEventListener("mousedown",e=>{
-    if(scale<=1)return;
-    isDragging=true;
-    startX=e.clientX-translateX;
-    startY=e.clientY-translateY;
-});
-
-document.addEventListener("mousemove",e=>{
-    if(!isDragging)return;
-    translateX=e.clientX-startX;
-    translateY=e.clientY-startY;
-    updateTransform();
-});
-
-document.addEventListener("mouseup",()=>isDragging=false);
-
-fsImage.addEventListener("dblclick",()=>{
-    scale=scale===1?2:1;
-    updateTransform();
-});
-
-</script>
+    </script>
 </body>
 </html>
