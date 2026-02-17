@@ -170,31 +170,37 @@
             border-radius: 32px;
             width: 90vw;
             max-width: 1300px;
-            max-height: 98vh;        /* increased from 90vh → taller modal */
+            max-height: 98vh;
             display: flex;
             flex-direction: column;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
             border: 1px solid #2e2e3a;
         }
         .modal-header {
-            padding: 0.6rem 1.8rem;   /* reduced from 1rem → more space for image */
+            padding: 0.6rem 1.8rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             color: #eee;
             border-bottom: 1px solid #2a2a33;
+            gap: 1rem;               /* added gap for better spacing */
         }
         .modal-header h3 {
             font-weight: 400;
             font-size: 1.3rem;
-            max-width: 400px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            /* ----- MODIFICATION: allow full description to be readable ----- */
+            max-width: 70%;            /* take more space */
+            white-space: normal;       /* allow wrapping */
+            word-break: break-word;    /* break long words */
+            overflow-y: auto;           /* scroll if extremely long */
+            max-height: 4.5rem;         /* about 3 lines, then scroll */
+            padding-right: 0.5rem;
+            line-height: 1.4;
         }
         .modal-controls {
             display: flex;
             gap: 1rem;
+            flex-shrink: 0;            /* prevent controls from shrinking */
         }
         .modal-controls button {
             background: transparent;
@@ -216,7 +222,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;            /* reduced from 1.5rem → more room for image */
+            padding: 1rem;
             background: #0a0a0e;
             position: relative;
             overflow: auto;
@@ -237,7 +243,7 @@
         .image-container img {
             display: block;
             max-width: 100%;
-            max-height: 80vh;          /* unchanged – picture size stays the same */
+            max-height: 80vh;
             width: auto;
             height: auto;
             border-radius: 8px;
@@ -273,7 +279,7 @@
             right: 20px;
         }
         .modal-footer {
-            padding: 0.5rem 1.8rem;   /* reduced from 0.8rem → more space for image */
+            padding: 0.5rem 1.8rem;
             color: #aaa;
             border-top: 1px solid #2a2a33;
             display: flex;
@@ -445,7 +451,6 @@
                     request.onupgradeneeded = (ev) => {
                         const db = ev.target.result;
                         if (!db.objectStoreNames.contains(STORE_NAME)) {
-                            // auto-increment id, store blobs directly
                             const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
                             store.createIndex('by_date', 'date');
                             store.createIndex('by_description', 'description');
@@ -473,7 +478,7 @@
                 const post = {
                     description: description || '',
                     date: date || new Date().toISOString().split('T')[0],
-                    images: blobs,  // array of Blob
+                    images: blobs,
                     createdAt: new Date().toISOString()
                 };
                 return new Promise((resolve, reject) => {
@@ -514,8 +519,19 @@
                 const lower = query.toLowerCase();
                 return all.filter(p => {
                     const descMatch = p.description.toLowerCase().includes(lower);
-                    const dateMatch = p.date.includes(lower);  // YYYY-MM-DD format
+                    const dateMatch = p.date.includes(lower);
                     return descMatch || dateMatch;
+                });
+            }
+
+            // --- SORTING HELPER: newest first (by date desc, then id desc) ---
+            function sortPostsNewestFirst(posts) {
+                return posts.sort((a, b) => {
+                    // compare date strings (YYYY-MM-DD) descending
+                    if (a.date > b.date) return -1;
+                    if (a.date < b.date) return 1;
+                    // if same date, use id (higher id == newer)
+                    return b.id - a.id;
                 });
             }
 
@@ -537,19 +553,21 @@
                 if (currentPosts) {
                     currentPosts.forEach(revokeThumbUrls);
                 }
-                currentPosts = posts || [];
 
-                if (!posts || posts.length === 0) {
+                // ----- MODIFICATION: sort posts so newest on top -----
+                const sortedPosts = sortPostsNewestFirst(posts || []);
+                currentPosts = sortedPosts;
+
+                if (!sortedPosts || sortedPosts.length === 0) {
                     grid.innerHTML = `<div class="empty-message">📸 no posts yet — click "+ New post"</div>`;
                     return;
                 }
 
                 let html = '';
-                for (let post of posts) {
+                for (let post of sortedPosts) {
                     const firstImage = post.images && post.images[0];
                     if (!firstImage) continue;
 
-                    // create object url (will be stored temporarily on post for cleanup)
                     const url = URL.createObjectURL(firstImage);
                     if (!post._urls) post._urls = [];
                     post._urls.push(url);
@@ -576,7 +594,7 @@
                 document.querySelectorAll('.post-card').forEach(card => {
                     card.addEventListener('click', (e) => {
                         const id = Number(card.dataset.postId);
-                        const post = posts.find(p => p.id === id);
+                        const post = sortedPosts.find(p => p.id === id);
                         if (post) openModal(post);
                     });
                 });
@@ -596,7 +614,7 @@
 
             let currentModalPost = null;
             let currentImageIndex = 0;
-            let currentModalUrls = []; // for cleanup
+            let currentModalUrls = [];
 
             function revokeModalUrls() {
                 currentModalUrls.forEach(url => URL.revokeObjectURL(url));
@@ -622,11 +640,9 @@
                 currentModalUrls.push(url);
                 modalImage.src = url;
                 modalCounter.textContent = `${currentImageIndex+1} / ${images.length}`;
-                // reset zoom
                 zoomContainer.classList.remove('zoomed');
             }
 
-            // navigation
             prevBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (!currentModalPost) return;
@@ -642,7 +658,6 @@
                 updateModalImage();
             });
 
-            // zoom on image click
             zoomContainer.addEventListener('click', (e) => {
                 e.stopPropagation();
                 zoomContainer.classList.toggle('zoomed');
@@ -654,14 +669,12 @@
                 currentModalPost = null;
             });
 
-            // delete post from modal
             deletePostBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (!currentModalPost) return;
                 const id = currentModalPost.id;
                 if (confirm('Delete this post permanently?')) {
                     await deletePostById(id);
-                    // refresh grid
                     const posts = await loadAllPosts();
                     renderGrid(posts);
                     modal.classList.remove('active');
@@ -669,8 +682,6 @@
                     currentModalPost = null;
                 }
             });
-
-            // close modal if click outside content? simple: click on modal closes? we'll not, only button
 
             // --- upload overlay ---
             const uploadOverlay = document.getElementById('uploadOverlay');
@@ -712,7 +723,6 @@
                     const blobs = await filesToBlobs(files);
                     await savePost(desc, date, blobs);
                     uploadOverlay.classList.remove('active');
-                    // refresh grid
                     const posts = await loadAllPosts();
                     renderGrid(posts);
                 } catch (err) {
@@ -725,7 +735,7 @@
             async function performSearch() {
                 const query = searchInput.value;
                 const results = await searchPosts(query);
-                renderGrid(results);
+                renderGrid(results);   // sorting is done inside renderGrid
             }
 
             searchBtn.addEventListener('click', performSearch);
@@ -744,7 +754,6 @@
                 }
             })();
 
-            // clean up object URLs on page unload (optional)
             window.addEventListener('beforeunload', () => {
                 if (currentPosts) {
                     currentPosts.forEach(revokeThumbUrls);
